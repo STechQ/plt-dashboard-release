@@ -1,0 +1,47 @@
+name: PLT Dashboard Release - Azure App Service Deploy
+
+on:
+  push:
+    paths:
+      - 'dist/**'
+      - 'server.js'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    name: Deploy PLT Dashboard
+    env:
+      AZURE_RESOURCE_GROUP: rg-studio-test-westeu
+      AZURE_WEBAPP_NAME: plt-dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate target
+        shell: bash
+        run: |
+          echo "repository -> $GITHUB_REPOSITORY"
+          echo "webApp -> $AZURE_WEBAPP_NAME"
+          echo "resourceGroup -> $AZURE_RESOURCE_GROUP"
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Validate Azure Web App
+        shell: bash
+        run: |
+          az webapp show \
+            --name "$AZURE_WEBAPP_NAME" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --query "defaultHostName" \
+            -o tsv
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: .
