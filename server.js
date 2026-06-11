@@ -22,13 +22,10 @@ app.use('/jira', createProxyMiddleware({
 }))
 
 // Build çıktısını serve et
-app.use('/plt-dashboard', express.static(join(__dirname, 'dist')))
-
-// Root → redirect
-app.get('/', (_, res) => res.redirect('/plt-dashboard/'))
+app.use(express.static(join(__dirname, 'dist')))
 
 // SPA fallback (Vue Router için)
-app.get('/plt-dashboard/*', (_, res) => {
+app.get('*', (_, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'))
 })
 
