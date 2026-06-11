@@ -40,8 +40,19 @@ jobs:
             --query "defaultHostName" \
             -o tsv
 
+      - name: Install production dependencies
+        run: npm install --omit=dev
+
+      - name: Prepare deploy package
+        shell: bash
+        run: |
+          mkdir -p deploy-package
+          cp -R dist deploy-package/dist
+          cp -R node_modules deploy-package/node_modules
+          cp server.js package.json deploy-package/
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          package: .
+          package: deploy-package
